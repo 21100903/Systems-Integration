@@ -19,6 +19,10 @@ const typeDefs = gql`
     updatePost(id: Int!, title: String, content: String): Post!
     deletePost(id: Int!): Post!
   }
+
+  type Subscription{
+    newPost: Post!
+    }
 `;
 
 const resolvers = {
@@ -42,9 +46,15 @@ const resolvers = {
       return prisma.post.delete({ where: { id: args.id } });
     },
   },
+  Subscription: {
+    newPost: {
+      subscribe: () => pubsub.asyncIterator(['NEW_POST']),
+    },
+  },
 };
 
 const server = new ApolloServer({ typeDefs, resolvers });
-server.listen({ port: 4002 }).then(({ url }) => {
+server.listen({ port: 4002 }).then(({ url, subscriptionsUrl }) => {
   console.log(`Posts service running at ${url}`);
+  console.log(`Subscriptions ready at ${subscriptionsUrl}`);
 });
