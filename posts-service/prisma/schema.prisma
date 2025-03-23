@@ -1,5 +1,5 @@
 datasource db {
-  provider = "sqlite"  // or postgresql if that's your setup
+  provider = "sqlite"
   url      = "file:./dev.db"
 }
 
@@ -12,4 +12,3 @@ model Post {
   title   String
   content String
 }
-
