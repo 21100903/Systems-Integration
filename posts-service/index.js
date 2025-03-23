@@ -34,6 +34,10 @@ const typeDefs = gql`
   type Subscription {
     postCreated: Post!
   }
+
+  type Subscription{
+    newPost: Post!
+    }
 `;
 
 // Resolvers for Query, Mutation, and Subscription
@@ -58,8 +62,14 @@ const resolvers = {
       subscribe: () => pubsub.asyncIterator([POST_CREATED]),
     },
   },
+  Subscription: {
+    newPost: {
+      subscribe: () => pubsub.asyncIterator(['NEW_POST']),
+    },
+  },
 };
 
+<<<<<<< HEAD
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 async function startServer() {
@@ -87,3 +97,10 @@ async function startServer() {
 }
 
 startServer().catch(error => console.error(error));
+=======
+const server = new ApolloServer({ typeDefs, resolvers });
+server.listen({ port: 4002 }).then(({ url, subscriptionsUrl }) => {
+  console.log(`Posts service running at ${url}`);
+  console.log(`Subscriptions ready at ${subscriptionsUrl}`);
+});
+>>>>>>> 14134973a59eae75fbdf12e62c6c97ca05d2e7d0
