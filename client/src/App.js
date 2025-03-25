@@ -12,6 +12,7 @@ import {
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
 import { getMainDefinition } from '@apollo/client/utilities';
+import './App.css';  // Import the updated CSS
 
 // HTTP link for queries and mutations (pointing to posts-service)
 const httpLink = new HttpLink({
@@ -85,35 +86,37 @@ function PostsTable() {
     }
   }, [subscriptionData]);
 
-  if (loading) return <p>Loading posts...</p>;
-  if (error) return <p>Error loading posts: {error.message}</p>;
+  if (loading) return <p className="status-message">Loading posts...</p>;
+  if (error) return <p className="status-message">Error loading posts: {error.message}</p>;
 
   return (
-    <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Title</th>
-          <th>Content</th>
-        </tr>
-      </thead>
-      <tbody>
-        {posts.map((post) => (
-          <tr key={post.id}>
-            <td>{post.id}</td>
-            <td>{post.title}</td>
-            <td>{post.content}</td>
+    <div className="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Content</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {posts.map((post) => (
+            <tr key={post.id}>
+              <td>{post.id}</td>
+              <td>{post.title}</td>
+              <td>{post.content}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
 function App() {
   return (
     <ApolloProvider client={client}>
-      <div style={{ margin: '20px' }}>
+      <div className="App">
         <h1>Live Posts Table</h1>
         <PostsTable />
       </div>

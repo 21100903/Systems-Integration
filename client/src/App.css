@@ -1,38 +1,66 @@
+/* Center the main app container */
 .App {
   text-align: center;
+  font-family: Arial, sans-serif;
+  margin: 20px;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* Page title */
+.App h1 {
+  color: #333;
+  margin-bottom: 20px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+/* Container for the table */
+.table-container {
+  max-width: 800px;
+  margin: 0 auto;
+  overflow-x: auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+/* Table basics */
+table {
+  width: 100%;
+  border-spacing: 0;
+  border-collapse: collapse;
 }
 
-.App-link {
-  color: #61dafb;
+/* Header */
+thead {
+  background-color: #009688;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+thead th {
+  color: #fff;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: bold;
+}
+
+/* Body rows */
+tbody tr {
+  border-bottom: 1px solid #ddd;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Table cells */
+td {
+  padding: 12px 16px;
+}
+
+/* Status messages */
+.status-message {
+  color: #666;
+  font-style: italic;
+  margin-top: 20px;
 }
