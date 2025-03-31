@@ -33,7 +33,6 @@ const typeDefs = gql`
   
   type Subscription {
   postCreated: Post!
-  newPost: Post!
 }
 
 `;
@@ -57,12 +56,7 @@ const resolvers = {
   },
   Subscription: {
     postCreated: {
-      subscribe: () => pubsub.asyncIterator([POST_CREATED]),
-    },
-  },
-  Subscription: {
-    newPost: {
-      subscribe: () => pubsub.asyncIterator(['NEW_POST']),
+      subscribe: () => pubsub.asyncIterableIterator([POST_CREATED]),
     },
   },
 };
