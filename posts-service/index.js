@@ -1,3 +1,4 @@
+// Existing requires...
 const express = require('express');
 const { ApolloServer } = require('apollo-server-express');
 const { createServer } = require('http');
@@ -7,12 +8,13 @@ const { makeExecutableSchema } = require('@graphql-tools/schema');
 const { PrismaClient } = require('@prisma/client');
 const { PubSub } = require('graphql-subscriptions');
 const gql = require('graphql-tag');
+const amqp = require('amqplib'); // New: require amqplib for RabbitMQ
 
 const prisma = new PrismaClient();
 const pubsub = new PubSub();
 const POST_CREATED = "POST_CREATED";
 
-// GraphQL Schema without the "published" field
+// GraphQL Schema and resolvers ...
 const typeDefs = gql`
   type Post {
     id: Int!
@@ -32,12 +34,10 @@ const typeDefs = gql`
   }
   
   type Subscription {
-  postCreated: Post!
-}
-
+    postCreated: Post!
+  }
 `;
 
-// Resolvers for Query, Mutation, and Subscription
 const resolvers = {
   Query: {
     posts: () => prisma.post.findMany(),
@@ -63,22 +63,55 @@ const resolvers = {
 
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
+// --- New: RabbitMQ Consumer Function ---
+async function consumeMessages() {
+  try {
+    const connection = await amqp.connect('amqp://localhost:5672');
+    const channel = await connection.createChannel();
+    const queueName = 'post.created';
+    
+    await channel.assertQueue(queueName, { durable: true });
+    console.log(`[*] Waiting for messages in queue: ${queueName}`);
+    
+    channel.consume(queueName, async (msg) => {
+      if (msg !== null) {
+        const postData = JSON.parse(msg.content.toString());
+        console.log('[x] Received message:', postData);
+        try {
+          // Create a new post using Prisma
+          const newPost = await prisma.post.create({ data: postData });
+          console.log('[+] Created Post in DB:', newPost);
+          // Optionally, publish to subscriptions for real-time updates
+          pubsub.publish(POST_CREATED, { postCreated: newPost });
+        } catch (err) {
+          console.error('Error creating post:', err);
+        }
+        channel.ack(msg);
+      }
+    }, { noAck: false });
+  } catch (error) {
+    console.error('Error in RabbitMQ consumer:', error);
+  }
+}
+
 async function startServer() {
-  // Create an Express app and HTTP server
   const app = express();
   const httpServer = createServer(app);
-
-  // Create Apollo Server instance using our schema
+  
+  // Create Apollo Server instance
   const server = new ApolloServer({ schema });
   await server.start();
   server.applyMiddleware({ app, path: '/' });
-
-  // Create a WebSocket server for subscriptions on the same endpoint (/graphql)
+  
+  // Setup WebSocket server for subscriptions
   const wsServer = new WebSocketServer({
     server: httpServer,
     path: '/graphql',
   });
   useServer({ schema }, wsServer);
+  
+  // Start the RabbitMQ consumer to listen for messages
+  consumeMessages();
 
   const PORT = 4002;
   httpServer.listen(PORT, () => {
